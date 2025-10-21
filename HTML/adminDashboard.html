@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/adminDashboard.css">
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-chart-line"></i> MILKVAULT ADMIN PANEL</h3>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" data-section="overview">
+                        <i class="fas fa-home"></i> Overview
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-section="inventory">
+                        <i class="fas fa-boxes"></i> Inventory
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-section="orders">
+                        <i class="fas fa-shopping-cart"></i> Orders
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-section="users">
+                        <i class="fas fa-users"></i> Users
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-section="alerts">
+                        <i class="fas fa-exclamation-triangle"></i> Low Stock
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <h2 id="page-title">Dashboard Overview</h2>
+                </div>
+                <div class="header-right">
+                    <div class="clock" id="clock">00:00:00</div>
+                    <div class="user-profile">
+                        <span>Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content">
+                <!-- Overview Section -->
+                <section id="overview" class="section active">
+                    <div class="row mb-4">
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="summary-card card-orders">
+                                <div class="card-icon">
+                                    <i class="fas fa-receipt"></i>
+                                </div>
+                                <div class="card-content">
+                                    <h6>Total Orders</h6>
+                                    <h3 id="total-orders">1,234</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="summary-card card-customers">
+                                <div class="card-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="card-content">
+                                    <h6>Total Customers</h6>
+                                    <h3 id="total-customers">856</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="summary-card card-products">
+                                <div class="card-icon">
+                                    <i class="fas fa-bottle-water"></i>
+                                </div>
+                                <div class="card-content">
+                                    <h6>Products in Stock</h6>
+                                    <h3 id="total-products">3,456</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="summary-card card-sales">
+                                <div class="card-icon">
+                                    <i class="fas fa-peso-sign"></i>
+                                </div>
+                                <div class="card-content">
+                                    <h6>Total Sales</h6>
+                                    <h3 id="total-sales">₱125,450</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Low Stock Alerts -->
+                    <div class="card alert-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-exclamation-circle"></i> Low Stock Alerts</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Current Stock</th>
+                                            <th>Min. Level</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="low-stock-table">
+                                        <tr>
+                                            <td>Product A</td>
+                                            <td>5</td>
+                                            <td>20</td>
+                                            <td><span class="badge bg-danger">Critical</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Product B</td>
+                                            <td>12</td>
+                                            <td>25</td>
+                                            <td><span class="badge bg-warning">Low</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Product C</td>
+                                            <td>8</td>
+                                            <td>15</td>
+                                            <td><span class="badge bg-danger">Critical</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Inventory Section -->
+                <section id="inventory" class="section">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5>Inventory Management</h5>
+                            <input type="text" class="form-control search-box" placeholder="Search products..." id="inventory-search">
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Product ID</th>
+                                            <th>Product Name</th>
+                                            <th>Stock</th>
+                                            <th>Price</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="inventory-table">
+                                        <tr>
+                                            <td>#001</td>
+                                            <td>Fresh Milk</td>
+                                            <td>150</td>
+                                            <td>₱25.00</td>
+                                            <td><span class="badge bg-success">In Stock</span></td>
+                                            <td><button class="btn btn-sm btn-primary">Edit</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td>#002</td>
+                                            <td>Cheese</td>
+                                            <td>45</td>
+                                            <td>₱35.00</td>
+                                            <td><span class="badge bg-warning">Low Stock</span></td>
+                                            <td><button class="btn btn-sm btn-primary">Edit</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td>#003</td>
+                                            <td>Butter</td>
+                                            <td>200</td>
+                                            <td>₱45.00</td>
+                                            <td><span class="badge bg-success">In Stock</span></td>
+                                            <td><button class="btn btn-sm btn-primary">Edit</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td>#004</td>
+                                            <td>Buttermilk</td>
+                                            <td>8</td>
+                                            <td>₱55.00</td>
+                                            <td><span class="badge bg-danger">Critical</span></td>
+                                            <td><button class="btn btn-sm btn-primary">Edit</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Orders Section -->
+                <section id="orders" class="section">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5>Order Tracking</h5>
+                            <input type="text" class="form-control search-box" placeholder="Search orders..." id="orders-search">
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="orders-table">
+                                        <tr>
+                                            <td>#ORD001</td>
+                                            <td>Charles Kenneth Clavano</td>
+                                            <td>2024-01-15</td>
+                                            <td>₱1,250.00</td>
+                                            <td><span class="badge bg-success">Delivered</span></td>
+                                            <td><button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#qrModalORD001">
+                                            <i class="fas fa-qrcode"></i> View QR Code</button>
+                                            </td>
+
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD002</td>
+                                            <td>Axle Melendres</td>
+                                            <td>2024-01-16</td>
+                                            <td>₱2,500.00</td>
+                                            <td><span class="badge bg-primary">Processing</span></td>
+                                            <td><button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#qrModalORD001">
+                                            <i class="fas fa-qrcode"></i> View QR Code</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD003</td>
+                                            <td>King Andrei Carandang</td>
+                                            <td>2024-01-17</td>
+                                            <td>₱875.50</td>
+                                            <td><span class="badge bg-warning">Pending</span></td>
+                                            <td><button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#qrModalORD001">
+                                            <i class="fas fa-qrcode"></i> View QR Code</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Users Section -->
+                <section id="users" class="section">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5>User Management</h5>
+                            <input type="text" class="form-control search-box" placeholder="Search users..." id="users-search">
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>User ID</th>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-table">
+                                        <tr>
+                                            <td>#USR001</td>
+                                            <td>Charles Kenneth Clavano</td>
+                                            <td>charleskennethclavano@example.com</td>
+                                            <td>+63 912 345 6789</td>
+                                            <td><span class="badge bg-success">Active</span></td>
+                                            <td><button class="btn btn-sm btn-warning">Edit</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td>#USR002</td>
+                                            <td>King Andrei Carandang</td>
+                                            <td>kingandreicarandang@example.com</td>
+                                            <td>+63 923 456 7890</td>
+                                            <td><span class="badge bg-success">Active</span></td>
+                                            <td><button class="btn btn-sm btn-warning">Edit</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td>#USR003</td>
+                                            <td>Axle Melendres</td>
+                                            <td>axlemelendres@example.com</td>
+                                            <td>+63 934 567 8901</td>
+                                            <td><span class="badge bg-danger">Inactive</span></td>
+                                            <td><button class="btn btn-sm btn-warning">Edit</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Low Stock Alerts Section -->
+                <section id="alerts" class="section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Low Stock Alerts</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Current Stock</th>
+                                            <th>Minimum Level</th>
+                                            <th>Alert Level</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="alerts-table">
+                                        <tr>
+                                            <td>Cheese</td>
+                                            <td>5</td>
+                                            <td>20</td>
+                                            <td><span class="badge bg-danger">Critical</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Butter</td>
+                                            <td>12</td>
+                                            <td>25</td>
+                                            <td><span class="badge bg-warning">Low</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Milk</td>
+                                            <td>8</td>
+                                            <td>15</td>
+                                            <td><span class="badge bg-danger">Critical</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Buttermlik</td>
+                                            <td>18</td>
+                                            <td>30</td>
+                                            <td><span class="badge bg-warning">Low</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div class="modal fade" id="qrModalORD001" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4">
+                <h5 class="mb-3">QR Code for Order #ORD001</h5>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=ORD001" alt="QR Code" class="mb-3">
+                    <p class="text-muted small">Scan this code to view or verify order details.</p>
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../JS/adminDashboard.js"></script>
+</body>
+</html>
