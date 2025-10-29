@@ -1,112 +1,95 @@
-// ===== CLOCK FUNCTIONALITY =====
-function updateClock() {
+// ===== DOM CONTENT LOADED =====
+document.addEventListener("DOMContentLoaded", () => {
+   console.log("DOM fully loaded and JS running!");
+
+  // ===== CLOCK FUNCTIONALITY =====
   const clockElement = document.getElementById("clock")
-  const now = new Date()
-  const hours = String(now.getHours()).padStart(2, "0")
-  const minutes = String(now.getMinutes()).padStart(2, "0")
-  const seconds = String(now.getSeconds()).padStart(2, "0")
-  clockElement.textContent = `${hours}:${minutes}:${seconds}`
-}
+  console.log("[v0] Clock element found:", clockElement)
 
-// Update clock every second
-setInterval(updateClock, 1000)
-updateClock()
-
-// ===== NAVIGATION =====
-document.querySelectorAll(".sidebar .nav-link").forEach((link) => {
-  link.addEventListener("click", (e) => {
-    e.preventDefault()
-
-    // Remove active class from all links
-    document.querySelectorAll(".sidebar .nav-link").forEach((l) => {
-      l.classList.remove("active")
-    })
-
-    // Add active class to clicked link
-    link.classList.add("active")
-
-    // Get section name
-    const sectionName = link.getAttribute("data-section")
-
-    // Hide all sections
-    document.querySelectorAll(".section").forEach((section) => {
-      section.classList.remove("active")
-    })
-
-    // Show selected section
-    document.getElementById(sectionName).classList.add("active")
-
-    // Update page title
-    const titles = {
-      overview: "Dashboard Overview",
-      inventory: "Inventory Management",
-      orders: "Order Tracking",
-      users: "User Management",
-      alerts: "Low Stock Alerts",
+  function updateClock() {
+    if (!clockElement) {
+      console.log("[v0] Clock element not found")
+      return
     }
-    document.getElementById("page-title").textContent = titles[sectionName]
-  })
-})
+    const now = new Date()
+    const h = String(now.getHours()).padStart(2, "0")
+    const m = String(now.getMinutes()).padStart(2, "0")
+    const s = String(now.getSeconds()).padStart(2, "0")
+    clockElement.textContent = `${h}:${m}:${s}`
+  }
 
-// ===== SEARCH FUNCTIONALITY =====
-function setupSearch(searchInputId, tableId) {
-  const searchInput = document.getElementById(searchInputId)
-  const table = document.getElementById(tableId)
+  updateClock()
+  setInterval(updateClock, 1000)
+  console.log("[v0] Clock started")
 
-  if (!searchInput || !table) return
+  // ===== SIDEBAR NAVIGATION =====
+  const navLinks = document.querySelectorAll(".sidebar .nav-link")
+  const sections = document.querySelectorAll(".section")
+  const pageTitle = document.getElementById("page-title")
 
-  searchInput.addEventListener("keyup", () => {
-    const searchTerm = searchInput.value.toLowerCase()
-    const rows = table.querySelectorAll("tbody tr")
+  console.log("[v0] Found nav links:", navLinks.length)
+  console.log("[v0] Found sections:", sections.length)
 
-    rows.forEach((row) => {
-      const text = row.textContent.toLowerCase()
-      row.style.display = text.includes(searchTerm) ? "" : "none"
+  navLinks.forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault()
+      console.log("[v0] Nav link clicked")
+
+      const sectionId = link.getAttribute("data-section")
+      console.log("[v0] Switching to section:", sectionId)
+
+      // Remove active class from all links
+      navLinks.forEach((l) => l.classList.remove("active"))
+      link.classList.add("active")
+
+      // Hide all sections and show the selected one
+      sections.forEach((sec) => {
+        sec.classList.remove("active")
+        sec.style.display = "none"
+      })
+
+      const targetSection = document.getElementById(sectionId)
+      if (targetSection) {
+        targetSection.classList.add("active")
+        targetSection.style.display = "block"
+        console.log("[v0] Section displayed:", sectionId)
+      } else {
+        console.log("[v0] Section not found:", sectionId)
+      }
+
+      // Update page title
+      const titles = {
+        overview: "Dashboard Overview",
+        inventory: "Inventory Management",
+        orders: "Order Tracking",
+        users: "User Management",
+        alerts: "Low Stock Alerts",
+      }
+      pageTitle.textContent = titles[sectionId] || "Dashboard"
     })
   })
-}
 
-// Initialize search for all tables
-setupSearch("inventory-search", "inventory-table")
-setupSearch("orders-search", "orders-table")
-setupSearch("users-search", "users-table")
+  // ===== SEARCH FUNCTIONALITY =====
+  function setupSearch(inputId, tableId) {
+    const input = document.getElementById(inputId)
+    const table = document.getElementById(tableId)
+    if (!input || !table) {
+      console.log("[v0] Search setup skipped - missing elements:", inputId, tableId)
+      return
+    }
 
-// ===== BUTTON ACTIONS =====
-document.addEventListener("click", (e) => {
-  // Edit button for inventory
-  if (e.target.closest("#inventory-table .btn-primary")) {
-    alert("Edit functionality - Implement your edit modal here")
+    input.addEventListener("keyup", () => {
+      const searchTerm = input.value.toLowerCase()
+      const rows = table.querySelectorAll("tbody tr")
+      rows.forEach((row) => {
+        row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? "" : "none"
+      })
+    })
   }
 
-  // View button for orders
-  if (e.target.closest("#orders-table .btn-info")) {
-    alert("View order details - Implement your order details modal here")
-  }
+  setupSearch("inventory-search", "inventory-table")
+  setupSearch("orders-search", "orders-table")
+  setupSearch("users-search", "users-table")
 
-  // Edit button for users
-  if (e.target.closest("#users-table .btn-warning")) {
-    alert("Edit user - Implement your user edit modal here")
-  }
-
-  // Reorder button for alerts
-  if (e.target.closest("#alerts-table .btn-success")) {
-    alert("Reorder initiated - Implement your reorder process here")
-  }
+  console.log("[v0] All setup complete")
 })
-
-// ===== SAMPLE DATA UPDATES (Optional) =====
-// You can update these values dynamically from your backend
-function updateDashboardStats(stats) {
-  if (stats.totalOrders) document.getElementById("total-orders").textContent = stats.totalOrders
-  if (stats.totalCustomers) document.getElementById("total-customers").textContent = stats.totalCustomers
-  if (stats.totalProducts) document.getElementById("total-products").textContent = stats.totalProducts
-  if (stats.totalSales) document.getElementById("total-sales").textContent = stats.totalSales
-}
-
-// Example: Update stats (uncomment to use)
-// updateDashboardStats({
-//     totalOrders: '2,500',
-//     totalCustomers: '1,200',
-//     totalProducts: '5,000',
-//     totalSales: '₱250,000'
-// });

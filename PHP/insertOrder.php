@@ -1,38 +1,33 @@
 <?php
-require_once '../phpqrcode/qrlib.php';       // Path to your QR library
-require_once '../PHP/dbConnection.php';     // Path to your Database class
+require_once '../phpqrcode/qrlib.php';       
+require_once '../PHP/dbConnection.php';     
 
-// Initialize DB connection
 $db = new Database();
 $conn = $db->getConnection();
 
-// Example order data (you can replace these later with form input)
 $customer_name = "Axle Melendres";
 $product_name = "Fresh Milk";
 $quantity = 3;
 $total_price = 450.00;
 
-// Insert the order first (QR path will be updated later)
+
 $sql = "INSERT INTO orders (customer_name, product_name, quantity, total_price)
         VALUES ('$customer_name', '$product_name', $quantity, $total_price)";
 
 if ($conn->query($sql) === TRUE) {
-    $order_id = $conn->insert_id; // Get the new order ID
+    $order_id = $conn->insert_id; 
 
-    // Prepare QR content
     $qr_text = "Order ID: $order_id\nCustomer: $customer_name\nProduct: $product_name\nQuantity: $quantity\nTotal: ₱$total_price";
 
-    // Folder for QR codes
+
     $path = '../img/';
     if (!file_exists($path)) {
         mkdir($path, 0777, true);
     }
 
-    // Generate QR code image
     $filename = $path . 'order_' . $order_id . '.png';
     QRcode::png($qr_text, $filename, 'H', 4, 4);
 
-    // Update the database with the QR code path
     $update_sql = "UPDATE orders SET qr_path = '$filename' WHERE order_id = $order_id";
     $conn->query($update_sql);
 
