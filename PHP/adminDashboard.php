@@ -102,40 +102,106 @@ $alertsStmt = getAlerts($conn);
         </div>
     </div>
 
-   <!-- Low Stock Alerts -->
+   <!-- Low Stock & Near Expiry Alerts -->
 <div class="card alert-card">
-    <div class="card-header"><h5><i class="fas fa-exclamation-circle"></i> Low Stock Alerts</h5></div>
+    <div class="card-header">
+        <h5><i class="fas fa-exclamation-circle"></i> Product Alerts</h5>
+    </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover align-middle">
                 <thead>
-                    <tr><th>Product</th><th>Current Stock</th><th>Min. Level</th><th>Status</th></tr>
+                    <tr>
+                        <th>Product</th>
+                        <th>Current Stock</th>
+                        <th>Min. Level</th>
+                        <th>Expiration Date</th>
+                        <th>Status</th>
+                    </tr>
                 </thead>
-                <tbody id="low-stock-table">
-                <?php while($alert = $alertsStmt->fetch_assoc()) : 
-                    // Determine status and badge color
-                    if ($alert['stock'] == 0) {
-                        $status = "Out of Stock";
-                        $badge = "bg-danger";
-                    } elseif ($alert['stock'] <= $alert['min_level']) {
-                        $status = "Critical";
-                        $badge = "bg-danger";
-                    } elseif ($alert['stock'] > $alert['min_level'] && $alert['stock'] <= ($alert['min_level'] + 5)) {
-                        $status = "Low";
-                        $badge = "bg-warning text-dark";
-                    } else {
-                        $status = "In Stock";
-                        $badge = "bg-success";
+                <tbody id="alert-table">
+                <?php 
+                $today = new DateTime();
+                $alerts = [];
+
+                // Gather all alert rows
+                while ($row = $alertsStmt->fetch_assoc()) {
+                    $statuses = [];
+                    $badgePriority = 999; // Used to pick the most urgent badge color
+
+                    // Check expiration
+                    if (!empty($row['expiration_date']) && $row['expiration_date'] !== '0000-00-00') {
+                        $expiryDate = new DateTime($row['expiration_date']);
+                        $diffDays = (int)$today->diff($expiryDate)->format('%r%a');
+                        $isExpired = $expiryDate < $today;
+                        $isNearExpiry = (!$isExpired && $diffDays <= 5);
+
+                        if ($isExpired) {
+                            $statuses[] = "Expired";
+                            $badgePriority = min($badgePriority, 1);
+                        } elseif ($isNearExpiry) {
+                            $statuses[] = "Near Expiry";
+                            $badgePriority = min($badgePriority, 2);
+                        }
                     }
-                ?>
+
+                    // Check stock levels
+                    if ($row['stock'] == 0) {
+                        $statuses[] = "Out of Stock";
+                        $badgePriority = min($badgePriority, 1);
+                    } elseif ($row['stock'] <= $row['min_level']) {
+                        $statuses[] = "Critical Stock";
+                        $badgePriority = min($badgePriority, 1);
+                    } elseif ($row['stock'] > $row['min_level'] && $row['stock'] <= ($row['min_level'] + 5)) {
+                        $statuses[] = "Low Stock";
+                        $badgePriority = min($badgePriority, 3);
+                    }
+
+                    // Skip items with no alerts
+                    if (empty($statuses)) continue;
+
+                    // Combine statuses
+                    $row['status'] = implode(', ', $statuses);
+
+                    // Assign badge color based on priority
+                    switch ($badgePriority) {
+                        case 1:
+                            $row['badge'] = 'bg-danger';
+                            $row['priority'] = 1;
+                            break;
+                        case 2:
+                            $row['badge'] = 'bg-warning text-dark';
+                            $row['priority'] = 2;
+                            break;
+                        case 3:
+                            $row['badge'] = 'bg-warning text-dark';
+                            $row['priority'] = 3;
+                            break;
+                        default:
+                            $row['badge'] = 'bg-success';
+                            $row['priority'] = 4;
+                    }
+
+                    $alerts[] = $row;
+                }
+
+                // Sort by priority (1 = highest urgency)
+                usort($alerts, fn($a, $b) => $a['priority'] <=> $b['priority']);
+
+                // Display sorted alerts
+                foreach ($alerts as $alert): ?>
                     <tr>
                         <td><?= htmlspecialchars($alert['product_name']) ?></td>
-                        <td><?= $alert['stock'] ?></td>
-                        <td><?= $alert['min_level'] ?></td>
-                        <td><span class="badge <?= $badge ?>"><?= $status ?></span></td>
+                        <td><?= htmlspecialchars($alert['stock']) ?></td>
+                        <td><?= htmlspecialchars($alert['min_level']) ?></td>
+                        <td><?= !empty($alert['expiration_date']) && $alert['expiration_date'] !== '0000-00-00' 
+                                ? htmlspecialchars($alert['expiration_date']) 
+                                : '<span class="text-muted">N/A</span>' ?></td>
+                        <td><span class="badge <?= $alert['badge'] ?>"><?= htmlspecialchars($alert['status']) ?></span></td>
                     </tr>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
                 </tbody>
+
             </table>
         </div>
     </div>
@@ -190,123 +256,170 @@ $alertsStmt = getAlerts($conn);
     </div>                           
 
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5>Inventory Management</h5>
-                        <input type="text" class="form-control search-box" placeholder="Search products..." id="inventory-search">
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                    <th>Product ID</th>
-                                    <th>Image</th>
-                                    <th>Name</th>
-                                    <th>Stock</th>
-                                    <th>Price</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                    </tr>
-                                <tbody id="inventory-table">
-                                <?php while($product = $inventoryStmt->fetch_assoc()):
-                                if ($product['stock'] == 0) {
-                                     $product['status'] = 'Out of Stock';
-                                }
-                                   switch ($product['status']) {
-                                    case 'Out of Stock':
-                                        $badge = "bg-danger";
-                                        break;
-                                    case 'Critical':
-                                        $badge = "bg-danger";
-                                        break;
-                                    case 'Low Stock':
-                                        $badge = "bg-warning text-dark";
-                                        break;
-                                    case 'In Stock':
-                                    default:
-                                        $badge = "bg-success";
-                                        break;
-                                    }
-                                ?>
-                                <tr>
-                                    <td>#<?= $product['product_id'] ?></td>
-                                    <td>
-                                        <?php if (!empty($product['image'])): ?>
-                                            <img src="../img/<?= htmlspecialchars($product['image']) ?>" alt="<?= htmlspecialchars($product['product_name']) ?>"
-                                                style="width:50px;height:50px;object-fit:cover;border-radius:5px;margin-right:8px;">
-                                        <?php endif; ?>
-                                        <?= htmlspecialchars($product['product_name']) ?>
-                                    </td>
-                                    <td><?= $product['stock'] ?></td>
-                                    <td>₱<?= number_format($product['price'],2) ?></td>
-                                    <td><span class="badge <?= $badge ?>"><?= htmlspecialchars($product['status']) ?></span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editProductModal<?= $product['product_id'] ?>">Edit</button>
-                                        <a href="../PHP/deleteProduct.php?id=<?= $product['product_id'] ?>" 
-                                        class="btn btn-sm btn-danger" 
-                                        onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
-                                    </td>
-                                </tr>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Inventory Management</h5>
+        <input type="text" class="form-control search-box" placeholder="Search products..." id="inventory-search">
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Stock</th>
+                        <th>Price</th>
+                        <th>Expiration Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-table">
+                <?php 
+                $today = new DateTime();
+                while ($product = $inventoryStmt->fetch_assoc()): 
+                    // compute expiry info safely (handle empty expiration_date)
+                    $isExpired = false;
+                    $isNearExpiry = false;
+                    if (!empty($product['expiration_date']) && $product['expiration_date'] !== '0000-00-00') {
+                        $expiryDate = new DateTime($product['expiration_date']);
+                        $diffDays = (int)$today->diff($expiryDate)->format('%r%a'); // signed days
+                        $isExpired = $expiryDate < $today;
+                        $isNearExpiry = (!$isExpired && $diffDays <= 5);
+                    }
 
-                                <!-- Edit Product Modal -->
-                                <div class="modal fade" id="editProductModal<?= $product['product_id'] ?>" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content p-4">
-                                            <h5 class="mb-3">Edit Product</h5>
-                                            <form action="../PHP/editProduct.php" method="POST" enctype="multipart/form-data">
-                                                <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
+                    // Build an array of statuses so we can show multiple labels (e.g. "Low Stock, Near Expiry")
+                    $statuses = [];
 
-                                                <div class="mb-3">
-                                                    <label>Product Name</label>
-                                                    <input type="text" name="product_name" class="form-control" 
-                                                        value="<?= htmlspecialchars($product['product_name']) ?>" required>
-                                                </div>
+                    // Expiry statuses first
+                    if ($isExpired) {
+                        $statuses[] = 'Expired';
+                    } elseif ($isNearExpiry) {
+                        $statuses[] = 'Near Expiry';
+                    }
 
-                                                <div class="row">
-                                                    <div class="col mb-3">
-                                                        <label>Stock</label>
-                                                        <input type="number" name="stock" class="form-control" value="<?= $product['stock'] ?>" required>
-                                                    </div>
-                                                    <div class="col mb-3">
-                                                        <label>Low Level</label>
-                                                        <input type="number" name="low_level" class="form-control" value="<?= $product['low_level'] ?>" required>
-                                                    </div>
-                                                    <div class="col mb-3">
-                                                        <label>Min Level</label>
-                                                        <input type="number" name="min_level" class="form-control" value="<?= $product['min_level'] ?>" required>
-                                                    </div>
-                                                </div>
+                    // Stock statuses
+                    if ((int)$product['stock'] === 0) {
+                        $statuses[] = 'Out of Stock';
+                    } elseif ((int)$product['stock'] <= (int)$product['min_level']) {
+                        $statuses[] = 'Critical';
+                    } elseif ((int)$product['stock'] > (int)$product['min_level'] && (int)$product['stock'] <= ((int)$product['min_level'] + 5)) {
+                        $statuses[] = 'Low Stock';
+                    } else {
+                        $statuses[] = 'In Stock';
+                    }
 
-                                                <div class="mb-3">
-                                                    <label>Price</label>
-                                                    <input type="number" step="0.01" name="price" class="form-control" 
-                                                        value="<?= $product['price'] ?>" required>
-                                                </div>
+                    // Combined status text
+                    $statusText = implode(', ', $statuses);
 
-                                                <div class="mb-3">
-                                                    <label>Expiration Date</label>
-                                                    <input type="date" name="expiration_date" class="form-control" 
-                                                        value="<?= $product['expiration_date'] ?>" required>
-                                                </div>
+                    // Pick badge color by priority (most urgent shown)
+                    if (in_array('Expired', $statuses)) {
+                        $badge = 'bg-secondary';
+                    } elseif (in_array('Out of Stock', $statuses) || in_array('Critical', $statuses)) {
+                        $badge = 'bg-danger';
+                    } elseif (in_array('Near Expiry', $statuses) || in_array('Low Stock', $statuses)) {
+                        $badge = 'bg-warning text-dark';
+                    } else {
+                        $badge = 'bg-success';
+                    }
+                ?>
+                <tr>
+                    <td>#<?= htmlspecialchars($product['product_id']) ?></td>
 
-                                                <div class="mb-3">
-                                                    <label>Replace Image (optional)</label>
-                                                    <input type="file" name="image" class="form-control" accept="image/*">
-                                                </div>
+                    <!-- Image column -->
+                    <td>
+                        <?php if (!empty($product['image'])): ?>
+                            <img src="../img/<?= htmlspecialchars($product['image']) ?>" 
+                                alt="<?= htmlspecialchars($product['product_name']) ?>"
+                                style="width:50px;height:50px;object-fit:cover;border-radius:5px;">
+                        <?php else: ?>
+                            <span class="text-muted">No Image</span>
+                        <?php endif; ?>
+                    </td>
 
-                                                <button type="submit" class="btn btn-success">Save Changes</button>
-                                            </form>
-                                        </div>
+                    <!-- Name -->
+                    <td><?= htmlspecialchars($product['product_name']) ?></td>
+
+                    <!-- Stock -->
+                    <td><?= (int)$product['stock'] ?></td>
+
+                    <!-- Price -->
+                    <td>₱<?= number_format((float)$product['price'], 2) ?></td>
+
+                    <!-- Expiration Date -->
+                    <td><?= !empty($product['expiration_date']) && $product['expiration_date'] !== '0000-00-00' ? htmlspecialchars($product['expiration_date']) : '<span class="text-muted">N/A</span>' ?></td>
+
+                    <!-- Status -->
+                    <td><span class="badge <?= $badge ?>"><?= htmlspecialchars($statusText) ?></span></td>
+
+
+                    <td>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editProductModal<?= $product['product_id'] ?>">Edit</button>
+                        <a href="../PHP/deleteProduct.php?id=<?= $product['product_id'] ?>" 
+                        class="btn btn-sm btn-danger" 
+                        onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
+                    </td>
+                </tr>
+
+                <!-- Edit Product Modal -->
+                <div class="modal fade" id="editProductModal<?= $product['product_id'] ?>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content p-4">
+                            <h5 class="mb-3">Edit Product</h5>
+                            <form action="../PHP/editProduct.php" method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
+
+                                <div class="mb-3">
+                                    <label>Product Name</label>
+                                    <input type="text" name="product_name" class="form-control" 
+                                        value="<?= htmlspecialchars($product['product_name']) ?>" required>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col mb-3">
+                                        <label>Stock</label>
+                                        <input type="number" name="stock" class="form-control" value="<?= (int)$product['stock'] ?>" required>
+                                    </div>
+                                    <div class="col mb-3">
+                                        <label>Low Level</label>
+                                        <input type="number" name="low_level" class="form-control" value="<?= (int)$product['low_level'] ?>" required>
+                                    </div>
+                                    <div class="col mb-3">
+                                        <label>Min Level</label>
+                                        <input type="number" name="min_level" class="form-control" value="<?= (int)$product['min_level'] ?>" required>
                                     </div>
                                 </div>
-                                <?php endwhile; ?>
-                                </tbody>
 
-                            </table>
+                                <div class="mb-3">
+                                    <label>Price</label>
+                                    <input type="number" step="0.01" name="price" class="form-control" 
+                                        value="<?= htmlspecialchars($product['price']) ?>" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label>Expiration Date</label>
+                                    <input type="date" name="expiration_date" class="form-control" 
+                                        value="<?= htmlspecialchars($product['expiration_date']) ?>" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label>Replace Image (optional)</label>
+                                    <input type="file" name="image" class="form-control" accept="image/*">
+                                </div>
+
+                                <button type="submit" class="btn btn-success">Save Changes</button>
+                            </form>
                         </div>
                     </div>
                 </div>
-            </section>
+                <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</section>
 
             <!-- Orders Section -->
             <section id="orders" class="section">
