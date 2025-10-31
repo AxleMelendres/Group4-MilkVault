@@ -73,13 +73,8 @@ $conn->close();
                         <p><strong>Status:</strong> <span class="status-badge status-<?php echo htmlspecialchars($order['status']); ?>"><?php echo htmlspecialchars($order['status']); ?></span></p>
                     </div>
                     <div class="qr-section">
-                        <?php 
-                        // The qr_path stored is relative to the PHP folder's parent (e.g., ../qr_codes/qr_1.png)
-                        // We need to strip the "../" to make it relative to the PHP folder
-                        $display_qr_path = str_replace('../', '', htmlspecialchars($order['qr_path']));
-                        ?>
                         <p>QR Code for Status Update:</p>
-                        <img src="<?php echo $display_qr_path; ?>" alt="QR Code for Order #<?php echo htmlspecialchars($order['order_id']); ?>">
+                        <img src="<?php echo htmlspecialchars($order['qr_path']); ?>" alt="QR Code for Order #<?php echo htmlspecialchars($order['order_id']); ?>">
                     </div>
                 </div>
             <?php endwhile; ?>
