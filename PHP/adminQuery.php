@@ -32,10 +32,21 @@ function getInventory($conn) {
     return $conn->query("SELECT * FROM products");
 }
 
-// --- Fetch Orders ---
 function getOrders($conn) {
-    return $conn->query("SELECT * FROM orders ORDER BY order_date DESC");
+    $sql = "
+        SELECT 
+            o.order_id,
+            CONCAT(c.first_name, ' ', c.last_name) AS customer_name,
+            o.total_price AS total_amount,
+            o.order_date,
+            o.status
+        FROM orders o
+        JOIN customers c ON o.customer_id = c.customer_id
+        ORDER BY o.order_date DESC
+    ";
+    return $conn->query($sql);
 }
+
 
 // --- Fetch Users ---
 function getUsers($conn) {
