@@ -22,12 +22,12 @@ function getSummaryData($conn) {
         'totalOrders' => $totalOrders,
         'totalCustomers' => $totalCustomers,
         'totalProducts' => $totalProducts,
-        'totalSales' => $totalSales ?? 0 // in case there are no delivered orders
+        'totalSales' => $totalSales ?? 0 
     ];
 }
 
 
-// --- Fetch Inventory ---
+// GET INVENTORY
 function getInventory($conn) {
     return $conn->query("SELECT * FROM products");
 }
@@ -48,7 +48,7 @@ function getOrders($conn) {
 }
 
 
-// --- Fetch Users ---
+// GET USERS
 function getUsers($conn) {
     $query = "
         SELECT 
@@ -62,7 +62,7 @@ function getUsers($conn) {
     return $conn->query($query);
 }
 
-// --- Fetch Low Stock & Near Expiry Alerts ---
+// GET LOW STOCKS & NEARLY EXPIRE PRODUCTS
 function getAlerts($conn, $nearExpiryDays = 7) {
     $today = date('Y-m-d');
     $nearExpiry = date('Y-m-d', strtotime("+$nearExpiryDays days"));

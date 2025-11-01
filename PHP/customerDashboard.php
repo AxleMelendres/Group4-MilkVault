@@ -6,27 +6,11 @@ if (!isset($_SESSION['customer_id'])) {
     exit();
 }
 
-include '../PHP/dbConnection.php';
+require_once '../PHP/customerQuery.php';
 
-// ✅ Create a Database instance and get the connection
-$database = new Database();
-$conn = $database->getConnection();
-
-$products = [];
-try {
-    // ✅ Added `image` field here
-    $query = "SELECT product_id, product_name, price, stock, image FROM products WHERE stock > 0 ORDER BY product_name ASC";
-    $result = $conn->query($query);
-    
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $products[] = $row;
-        }
-    }
-} catch (Exception $e) {
-    error_log("Error fetching products: " . $e->getMessage());
-}
+$products = getAvailableProducts($conn);
 ?>
+
 
 
 <!DOCTYPE html>
@@ -40,10 +24,6 @@ try {
     <link rel="stylesheet" href="../CSS/customerDashboarddd.css">
 </head>
 <body>
-    <!-- 
-        CRITICAL FIX: HTML ELEMENT FOR NOTIFICATION ADDED HERE 
-        This is necessary for customerDashboard.js to work without errors.
-    -->
     <div id="cart-notification-message" style="
         display: none; 
         position: fixed; 
@@ -73,7 +53,7 @@ try {
                 <a href="customerDashboard.php" class="nav-link active">
                     <i class="fas fa-home"></i> Home
                 </a>
-                <a href="customerProducts.php" class="nav-link">
+                <a href="../PHP/customerOrders.php" class="nav-link">
                     <i class="fas fa-bottle-water"></i> Products
                 </a>
                 <a href="../PHP/customerCart.php" class="nav-link">

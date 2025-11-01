@@ -1,0 +1,148 @@
+body { 
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5; /* Light gray background */
+    margin: 0;
+    padding: 20px;
+}
+
+.container { 
+    max-width: 1000px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Smoother shadow */
+}
+
+h1 {
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+    font-size: 2em;
+}
+
+/* --- Order Card Styles --- */
+
+.order-card { 
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+    background-color: #fff;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.order-card:hover {
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.card-left {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.order-header h2 { 
+    margin: 0;
+    color: #0056b3; 
+    font-size: 1.5em;
+}
+
+.order-date {
+    color: #6c757d;
+    font-size: 0.85em;
+    margin-top: 2px;
+}
+
+.order-total p { 
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #28a745; 
+}
+
+
+.status-badge { 
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    display: inline-block;
+    letter-spacing: 0.5px;
+}
+
+.status-pending { 
+    background-color: #ffc107;
+    color: #333;
+}
+
+.status-processing { 
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+.status-shipped { 
+    background-color: #28a745;
+    color: #fff;
+}
+
+.status-delivered { 
+    background-color: #007bff;
+    color: #fff;
+}
+
+.status-cancelled { 
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.card-right {
+    display: flex;
+    align-items: center;
+}
+
+.product-preview-section { 
+    text-align: center;
+    padding: 10px;
+    border-radius: 6px;
+    height: 140px; 
+}
+
+.preview-label {
+    margin: 0 0 5px 0;
+    font-size: 0.85em;
+    color: #6c757d;
+}
+
+.product-preview-section img { 
+
+    width: 100px;
+    height: 100px; 
+    object-fit: contain; 
+    border: 3px solid #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
+    border-radius: 8px; 
+}
+
+
+
+.back-button { 
+    display: inline-block;
+    margin-bottom: 25px;
+    padding: 8px 15px;
+    background-color: #5cb85c;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background-color 0.3s;
+}
+
+.back-button:hover {
+    background-color: #4cae4c;
+}
