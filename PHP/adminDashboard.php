@@ -33,7 +33,6 @@ $alertsStmt = getAlerts($conn);
 </head>
 <body>
 <div class="d-flex">
-    <!-- Sidebar -->
     <nav class="sidebar">
         <div class="sidebar-header">
             <h3><i class="fas fa-chart-line"></i> MILKVAULT ADMIN PANEL</h3>
@@ -47,9 +46,7 @@ $alertsStmt = getAlerts($conn);
         </ul>
     </nav>
 
-    <!-- Main Content -->
     <div class="main-content">
-        <!-- Header -->
         <header class="header d-flex justify-content-between align-items-center">
             <h2 id="page-title">Dashboard Overview</h2>
             <div class="d-flex align-items-center">
@@ -58,10 +55,8 @@ $alertsStmt = getAlerts($conn);
             </div>
         </header>
 
-        <!-- Content Area -->
+        <!-- OVERVIEW SECTION -->
         <div class="content">
-            <!-- Overview Section -->
-            <!-- Overview Section -->
 <section id="overview" class="section active">
     <div class="row mb-4">
         <div class="col-md-6 col-lg-3 mb-3">
@@ -465,7 +460,13 @@ $alertsStmt = getAlerts($conn);
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content text-center p-4">
                                                 <h5 class="mb-3">QR Code for Order #<?= $order['order_id'] ?></h5>
-                                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=<?= $order['order_id'] ?>" alt="QR Code" class="mb-3">
+                                                <?php 
+                                                // Build the same URL used in customerOrders.php
+                                                $qrData = "http://192.168.1.4/MILKVAULTFP/PHP/updateOrderStatus.php?order_id=" . urlencode($order['order_id']);
+                                                ?>
+                                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=<?= urlencode($qrData) ?>" 
+                                                    alt="QR Code for Order #<?= htmlspecialchars($order['order_id']) ?>" 
+                                                    class="mb-3">
                                                 <p class="text-muted small">Scan to verify order details.</p>
                                                 <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
                                             </div>
