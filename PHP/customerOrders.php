@@ -32,7 +32,7 @@ $conn->close();
             <?php foreach ($orders as $order): ?>
                 <div class="order-card">
                     <div class="card-left">
-                        <!-- Order ID and Date -->
+                        <!-- ORDER DETAILS  -->
                         <div class="order-header">
                             <h2><?php echo htmlspecialchars($order['product_name']); ?> × 
                             <?php echo htmlspecialchars($order['quantity']); ?>
@@ -43,14 +43,14 @@ $conn->close();
                             </p>
                         </div>
                         
-                        <!-- Status Badge -->
+                        <!-- ORDER STATUS -->
                         <p>
                             <span class="status-badge status-<?php echo htmlspecialchars(strtolower($order['status'])); ?>">
                                 <?php echo htmlspecialchars($order['status']); ?>
                             </span>
                         </p>
                         
-                        <!-- Total Price -->
+                        <!-- TOTAL PRICE -->
                         <div class="order-total">
                             <p><strong>Total:</strong> ₱<?php echo number_format((float)$order['total_price'], 2); ?></p>
                         </div>

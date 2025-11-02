@@ -32,7 +32,7 @@ $products = getAvailableProducts($conn);
         padding: 15px 25px; 
         border-radius: 8px; 
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 10000; /* Increased Z-index to ensure it is always on top */
+        z-index: 10000; 
         font-weight: bold;
         transition: opacity 0.5s ease;
         text-align: center;
@@ -40,11 +40,10 @@ $products = getAvailableProducts($conn);
         ">
         Item added successfully!
     </div>
-    <!-- END NOTIFICATION ELEMENT -->
 
 
     <div class="dashboard-container">
-        <!-- Sidebar Navigation -->
+        <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2 class="brand-name">MilkVault</h2>
@@ -68,9 +67,7 @@ $products = getAvailableProducts($conn);
             </nav>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Top Header -->
             <header class="top-header">
                 <div class="header-content">
                     <h2>Welcome, <?php echo htmlspecialchars($_SESSION['customer_name']); ?>!</h2>
@@ -81,7 +78,7 @@ $products = getAvailableProducts($conn);
                 </div>
             </header>
 
-            <!-- ✅ Featured Products Section with Image -->
+            <!-- FEATURED PRODUCTS -->
             <section class="featured-products-section">
                 <div class="section-header">
                     <h2 class="section-title">Featured Products</h2>
@@ -92,7 +89,7 @@ $products = getAvailableProducts($conn);
                     <div class="products-grid">
                         <?php foreach ($products as $product): ?>
                             <div class="product-card">
-                                <!-- Product Image block (Your compact design changes should be applied in CSS) -->
+                                <!-- DISPLAY PRODUCT IMAGE) -->
                                 <div class="product-image">
                                     <?php
                                     $imagePath = "../img/" . htmlspecialchars($product['image']);
@@ -105,7 +102,7 @@ $products = getAvailableProducts($conn);
                                 
                                 <div class="product-info">
                                     <h3 class="product-name"><?php echo htmlspecialchars($product['product_name']); ?></h3>
-                                    <!-- Price Display (Adjusted for better visibility in compact mode) -->
+                                    <!-- DISPLAY PRODUCT PRICE-->
                                     <div class="price-container">
                                         <span class="current-price">₱<?php echo number_format($product['price'], 2); ?></span>
                                     </div>

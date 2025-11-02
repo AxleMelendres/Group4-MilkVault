@@ -6,10 +6,11 @@ $conn = $database->getConnection();
 $order_id_to_fetch = $_GET['order_id'] ?? null;
 $message = "";
 $order = null;
+$order_items = [];
 
 if ($order_id_to_fetch) {
     try {
-        // Get current status
+        // ✅ Get current status
         $stmt = $conn->prepare("SELECT status FROM orders WHERE order_id = ?");
         $stmt->bind_param("i", $order_id_to_fetch);
         $stmt->execute();
@@ -29,12 +30,29 @@ if ($order_id_to_fetch) {
             $message = "<div class='message info'>ℹ️ Order #$order_id_to_fetch is already Delivered.</div>";
         }
 
-        // Fetch updated order
-        $fetch = $conn->prepare("SELECT * FROM orders WHERE order_id = ?");
+        // ✅ Fetch updated order with full customer name using CONCAT
+        $fetch = $conn->prepare("
+            SELECT o.*, CONCAT(c.first_name, ' ', c.last_name) AS customer_name
+            FROM orders o
+            JOIN customers c ON o.customer_id = c.customer_id
+            WHERE o.order_id = ?
+        ");
         $fetch->bind_param("i", $order_id_to_fetch);
         $fetch->execute();
         $order = $fetch->get_result()->fetch_assoc();
         $fetch->close();
+
+        // ✅ Fetch order items (product name + quantity + total)
+        $details = $conn->prepare("
+            SELECT p.product_name, od.quantity, (p.price * od.quantity) AS total
+            FROM order_details od
+            JOIN products p ON od.product_id = p.product_id
+            WHERE od.order_id = ?
+        ");
+        $details->bind_param("i", $order_id_to_fetch);
+        $details->execute();
+        $order_items = $details->get_result()->fetch_all(MYSQLI_ASSOC);
+        $details->close();
 
     } catch (Exception $e) {
         $message = "<div class='message error'>Error: " . htmlspecialchars($e->getMessage()) . "</div>";
@@ -54,7 +72,7 @@ $conn->close();
     <title>Order Delivery Confirmation</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f6f8; text-align: center; margin: 0; padding: 40px; }
-        .container { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 450px; margin: auto; padding: 30px; }
+        .container { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 550px; margin: auto; padding: 30px; }
         h1 { color: #1976d2; margin-bottom: 20px; }
         .message { padding: 15px; border-radius: 8px; margin-bottom: 20px; }
         .success { background-color: #e8f5e9; color: #2e7d32; }
@@ -62,6 +80,10 @@ $conn->close();
         .info { background-color: #fffde7; color: #ff8f00; }
         .order-details { text-align: left; margin-top: 20px; }
         .order-details p { margin: 5px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background-color: #f0f0f0; }
+        .total { font-weight: bold; text-align: right; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -70,11 +92,33 @@ $conn->close();
         <?= $message ?>
         <?php if ($order): ?>
             <div class="order-details">
+                <p><strong>Customer Name:</strong> <?= htmlspecialchars($order['customer_name']) ?></p>
                 <p><strong>Order ID:</strong> <?= htmlspecialchars($order['order_id']) ?></p>
                 <p><strong>Status:</strong> <?= htmlspecialchars($order['status']) ?></p>
-                <p><strong>Total:</strong> ₱<?= number_format($order['total_price'], 2) ?></p>
                 <p><strong>Order Date:</strong> <?= htmlspecialchars($order['order_date']) ?></p>
             </div>
+
+            <h3>🛒 Ordered Items</h3>
+            <table>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Qty</th>
+                    <th>Subtotal</th>
+                </tr>
+                <?php 
+                $grandTotal = 0;
+                foreach ($order_items as $item): 
+                    $grandTotal += $item['total'];
+                ?>
+                <tr>
+                    <td><?= htmlspecialchars($item['product_name']) ?></td>
+                    <td><?= htmlspecialchars($item['quantity']) ?></td>
+                    <td>₱<?= number_format($item['total'], 2) ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+            <p class="total">Total Price: ₱<?= number_format($grandTotal, 2) ?></p>
+
         <?php endif; ?>
         <p style="margin-top:25px;color:#777;">This transaction confirms receipt of your order.</p>
     </div>
