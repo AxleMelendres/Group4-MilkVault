@@ -1,5 +1,6 @@
 <?php
 require_once '../PHP/dbConnection.php';
+require_once '../PHP/sendSms.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $firstName = $_POST['firstName'];
@@ -10,65 +11,59 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
     $confirmPassword = $_POST['confirmPassword'];
 
-    // Password match check
     if ($password !== $confirmPassword) {
         echo "<script>alert('Passwords do not match!'); window.history.back();</script>";
         exit();
     }
 
-    // Create database instance and get connection
     $database = new Database();
     $conn = $database->getConnection();
 
-    // ✅ Check if username already exists
-    $checkUsernameSql = "SELECT * FROM customers WHERE username = ?";
-    $checkUsernameStmt = $conn->prepare($checkUsernameSql);
-    $checkUsernameStmt->bind_param("s", $username);
-    $checkUsernameStmt->execute();
-    $usernameResult = $checkUsernameStmt->get_result();
-
-    if ($usernameResult->num_rows > 0) {
-        echo "<script>alert('This username is already taken. Please choose another one.'); window.history.back();</script>";
-        $checkUsernameStmt->close();
-        $database->closeConnection();
+    // Check username uniqueness
+    $checkUsername = $conn->prepare("SELECT * FROM customers WHERE username = ?");
+    $checkUsername->bind_param("s", $username);
+    $checkUsername->execute();
+    $userResult = $checkUsername->get_result();
+    if ($userResult->num_rows > 0) {
+        echo "<script>alert('Username already taken.'); window.history.back();</script>";
         exit();
     }
+    $checkUsername->close();
 
-    $checkUsernameStmt->close();
-
-    // ✅ Check if contact number already exists
-    $checkContactSql = "SELECT * FROM customers WHERE contact_number = ?";
-    $checkContactStmt = $conn->prepare($checkContactSql);
-    $checkContactStmt->bind_param("s", $contactNumber);
-    $checkContactStmt->execute();
-    $contactResult = $checkContactStmt->get_result();
-
+    // Check contact number uniqueness
+    $checkContact = $conn->prepare("SELECT * FROM customers WHERE contact_number = ?");
+    $checkContact->bind_param("s", $contactNumber);
+    $checkContact->execute();
+    $contactResult = $checkContact->get_result();
     if ($contactResult->num_rows > 0) {
-        echo "<script>alert('This contact number is already registered. Please use a different one.'); window.history.back();</script>";
-        $checkContactStmt->close();
-        $database->closeConnection();
+        echo "<script>alert('Contact number already registered.'); window.history.back();</script>";
         exit();
     }
+    $checkContact->close();
 
-    $checkContactStmt->close();
-
-    // Hash the password
+    // Prepare OTP
+    $otp = rand(100000, 999999);
+    $expiry = date("Y-m-d H:i:s", time() + 300); // 5 min expiry
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    // Insert new customer
-    $sql = "INSERT INTO customers (first_name, last_name, username, address, contact_number, password)
-            VALUES (?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssss", $firstName, $lastName, $username, $address, $contactNumber, $hashedPassword);
+    // Insert customer (unverified)
+    $insert = $conn->prepare("INSERT INTO customers 
+        (first_name, last_name, username, address, contact_number, password, otp, otp_expiry, is_verified)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)");
+    $insert->bind_param("ssssssss", $firstName, $lastName, $username, $address, $contactNumber, $hashedPassword, $otp, $expiry);
 
-    if ($stmt->execute()) {
-        echo "<script>alert('Registration successful!'); window.location.href='../HTML/customerLogin.html';</script>";
+    if ($insert->execute()) {
+        // Send OTP via SMS
+        sendSMS($contactNumber, "Your MilkVault verification code is: $otp");
+
+        // Redirect to verification page
+        header("Location: ../PHP/verifyOTP.php?phone=" . urlencode($contactNumber));
+        exit();
     } else {
-        echo "<script>alert('Database error occurred. Please try again later.'); window.history.back();</script>";
+        echo "<script>alert('Registration failed. Please try again.'); window.history.back();</script>";
     }
 
-    // Close connections
-    $stmt->close();
+    $insert->close();
     $database->closeConnection();
 }
 ?>

@@ -23,7 +23,7 @@ try {
     $totalPrice = 0;
     $cartItems = [];
 
-    // 1️⃣ Fetch Cart Items
+    // GET CART ITEMS
     $stmt = $conn->prepare("
         SELECT c.product_id, c.quantity, c.price, p.product_name, p.stock
         FROM cart c
@@ -47,14 +47,14 @@ try {
     }
     $stmt->close();
 
-    // 2️⃣ Insert into orders table
+    // INSERT INTO THE ORDER TABLE
     $order_stmt = $conn->prepare("INSERT INTO orders (customer_id, total_price, status) VALUES (?, ?, 'Pending')");
     $order_stmt->bind_param("id", $customer_id, $totalPrice);
     $order_stmt->execute();
     $order_id = $conn->insert_id;
     $order_stmt->close();
 
-    // 3️⃣ Insert Order Details and Update Stock
+    // INSERT ORDER DETAILS & UPDATE PRODUCT STOCKS
     $detail_stmt = $conn->prepare("
         INSERT INTO order_details (order_id, product_id, product_name, quantity, unit_price, sub_total)
         VALUES (?, ?, ?, ?, ?, ?)
@@ -81,16 +81,13 @@ try {
     $detail_stmt->close();
     $stock_stmt->close();
 
-// 4️⃣ Generate QR Code (auto link to delivery confirmation)
+// GENERATE QR COEDE (AUTO LINK TO DELIVERY CONFIRMATION)
 $qrDir = '../qr_codes/';
 if (!is_dir($qrDir)) mkdir($qrDir, 0755, true);
 
-// Create full link for QR code
+// CREATE FULL LINK FOR QR CODE
 $qrData = $base_url . 'updateOrderStatus.php?order_id=' . urlencode($order_id);
 
-
-// Debug: Write the actual QR data into a log file
-error_log("QR DATA GENERATED => " . $qrData);
 
 // File name and path
 $qrFileName = 'qr_' . $order_id . '.png';
@@ -111,7 +108,7 @@ $updateQR->execute();
 $updateQR->close();
 
 
-    // 5️⃣ Clear Cart
+    // CLEAR CART
     $clearCart = $conn->prepare("DELETE FROM cart WHERE customer_id = ?");
     $clearCart->bind_param("i", $customer_id);
     $clearCart->execute();
