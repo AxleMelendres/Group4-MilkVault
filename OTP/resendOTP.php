@@ -1,6 +1,6 @@
 <?php
 require_once '../PHP/dbConnection.php';
-require_once '../PHP/sendSms.php';
+require_once '../OTP/sendSms.php';
 
 $phone = $_GET['phone'] ?? '';
 

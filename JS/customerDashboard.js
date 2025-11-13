@@ -1,33 +1,32 @@
 // Load customer data on page load
 document.addEventListener("DOMContentLoaded", () => {
-    loadCustomerData();
+    // Start dashboard stat loading
+    loadCustomerData(); 
+    // Start the corrected chat system logic
+    initializeChatSystem(); 
 });
 
-function loadCustomerData() {
-    // Get customer name from session/localStorage
-    const customerName = localStorage.getItem("customerName") || "Customer";
-    const nameElement = document.getElementById("customerName");
-    if (nameElement) nameElement.textContent = customerName;
+// --- HELPER FUNCTIONS (Kept outside the chat init for general accessibility) ---
 
-    // Fetch dashboard stats
-    fetch("getDashboardStats.php")
+function loadCustomerData() {
+    // Load customer data and dashboard stats
+    fetch("../PHP/getDashboardStats.php", { credentials: 'include' })
         .then((response) => response.json())
         .then((data) => {
             if (data.success) {
-                document.getElementById("totalOrders").textContent = data.totalOrders;
-                document.getElementById("pendingDeliveries").textContent = data.pendingDeliveries;
-                document.getElementById("accountBalance").textContent =
-                    "₱" + Number.parseFloat(data.accountBalance).toFixed(2);
+                // Assuming elements exist in HTML
+                const totalOrdersEl = document.getElementById("totalOrders");
+                const pendingDeliveriesEl = document.getElementById("pendingDeliveries");
+                const accountBalanceEl = document.getElementById("accountBalance");
+                
+                if (totalOrdersEl) totalOrdersEl.textContent = data.totalOrders;
+                if (pendingDeliveriesEl) pendingDeliveriesEl.textContent = data.pendingDeliveries;
+                if (accountBalanceEl) accountBalanceEl.textContent = "₱" + Number.parseFloat(data.accountBalance).toFixed(2);
             }
         })
         .catch((error) => console.error("Error loading dashboard stats:", error));
 }
 
-/**
- * Helper function to display temporary, non-blocking notification messages.
- * @param {string} message The message to display.
- * @param {boolean} isSuccess True for success (green), false for error (red).
- */
 function showNotification(message, isSuccess) {
     const successMessageElement = document.getElementById('cart-notification-message');
     if (!successMessageElement) return;
@@ -35,43 +34,29 @@ function showNotification(message, isSuccess) {
     successMessageElement.textContent = message;
     successMessageElement.style.display = 'block';
 
-    if (isSuccess) {
-        successMessageElement.style.backgroundColor = '#28a745'; // Green for success
-        successMessageElement.style.color = 'white';
-    } else {
-        successMessageElement.style.backgroundColor = '#dc3545'; // Red for failure
-        successMessageElement.style.color = 'white';
-    }
-
+    successMessageElement.style.backgroundColor = isSuccess ? '#28a745' : '#dc3545';
+    successMessageElement.style.color = 'white';
     successMessageElement.style.opacity = 1;
-    
-    // Automatically hide the message after 3 seconds
+
     setTimeout(() => {
         successMessageElement.style.opacity = 0;
         setTimeout(() => { successMessageElement.style.display = 'none'; }, 500);
     }, 3000);
 }
 
-/* 🛒 Add to Cart */
 function addToCart(productId, productName) {
-    // Initial feedback: show gold loading message
     showNotification(`Adding ${productName} to cart...`, false);
-    document.getElementById('cart-notification-message').style.backgroundColor = '#ffc107'; // Gold/yellow color for pending
+    const notificationEl = document.getElementById('cart-notification-message');
+    if (notificationEl) notificationEl.style.backgroundColor = '#ffc107';
 
     fetch("../PHP/addToCart.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify({ product_id: productId }),
     })
-    .then((response) => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
+    .then((response) => response.json())
     .then((data) => {
-        console.log("Server response:", data); // 🧠 Debug
-        
         if (data.success) {
             showNotification(`✅ ${productName} successfully added!`, true);
         } else {
@@ -82,4 +67,155 @@ function addToCart(productId, productName) {
         console.error("Error adding to cart:", error);
         showNotification("❌ Network error. Could not connect to server.", false);
     });
+}
+
+// ---------------- CORRECTED CHAT SYSTEM INITIALIZATION ----------------
+// All chat logic is contained in this function for consistent scoping.
+
+function initializeChatSystem() {
+    // Retrieve IDs from the body data attributes
+    const userId = Number(document.body.dataset.customerId);
+    const adminId = Number(document.body.dataset.defaultAdminId || 1);
+
+    // CRITICAL: Get the elements using the IDs from customerDashboard.php
+    const chatContainer = document.getElementById('chat-container');
+    const chatBox = document.getElementById('chat-box');
+    const openChat = document.getElementById('openChat');
+    const closeChat = document.getElementById('closeChat');
+    const sendButton = document.getElementById('sendMessage'); // The button element
+    const messageInput = document.getElementById('messageInput'); // The input element
+
+    if (!chatContainer || !chatBox || !openChat || !closeChat || !sendButton || !messageInput) {
+        console.error("Chat system elements not found in HTML. Chat functionality disabled.");
+        return; // Stop if core elements are missing
+    }
+
+    function formatTimestamp(timestamp) {
+        if (!timestamp) return '';
+        const date = new Date(timestamp);
+        return Number.isNaN(date.getTime()) 
+            ? '' 
+            : date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderMessages(messages) {
+        chatBox.innerHTML = '';
+        if (!messages.length) {
+            const emptyState = document.createElement('div');
+            emptyState.className = 'text-center text-muted mt-5';
+            emptyState.textContent = 'Start chatting with admin...';
+            chatBox.appendChild(emptyState);
+            return;
+        }
+
+        messages.forEach((msg) => {
+            const isMine = msg.sender_type === 'customer';
+            const wrapper = document.createElement('div');
+            wrapper.className = `d-flex flex-column mb-2 ${isMine ? 'align-items-end' : 'align-items-start'}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = `px-3 py-2 rounded-3 ${isMine ? 'bg-primary text-white' : 'bg-light text-dark'}`;
+            bubble.textContent = msg.message;
+
+            const timestamp = document.createElement('small');
+            timestamp.className = `text-muted mt-1 ${isMine ? 'text-end' : 'text-start'}`;
+            timestamp.textContent = formatTimestamp(msg.created_at);
+
+            wrapper.appendChild(bubble);
+            if (timestamp.textContent) wrapper.appendChild(timestamp);
+            chatBox.appendChild(wrapper);
+        });
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function fetchMessages(forceScroll = false) {
+        fetch(`../PHP/fetchMessages.php?customer_id=${encodeURIComponent(userId)}`, {
+    credentials: 'include'
+})
+
+        .then(res => res.json())
+        .then(payload => {
+            if (!payload.success) {
+                console.error('Failed to load messages:', payload.message);
+                return;
+            }
+            renderMessages(payload.messages);
+            if (forceScroll) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        })
+        .catch(err => {
+            console.error('Conversation fetch error:', err);
+        });
+    }
+
+    // CRITICAL FIX: The function that sends the message (now correctly sends JSON)
+    function postMessage() {
+        const msg = messageInput.value.trim();
+        if (msg === '') return;
+
+        // Use the correctly scoped element variables
+        messageInput.disabled = true;
+        sendButton.disabled = true; 
+
+        fetch('../PHP/sendMessage.php', {
+            method: 'POST',
+            // 1. CRITICAL FIX: Correct JSON header
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            // 2. CRITICAL FIX: Send the body as a JSON string with correct key
+            body: JSON.stringify({ 
+                admin_id: adminId, 
+                message: msg 
+            })
+        })
+        .then(res => res.json())
+        .then(payload => {
+            if (!payload.success) {
+                console.error('Failed to send message:', payload.message);
+                showNotification(payload.message || 'Failed to send message.', false);
+                return;
+            }
+            messageInput.value = '';
+            fetchMessages(true); // Fetch and scroll to the new message
+        })
+        .catch(err => {
+            console.error('Chat send error:', err);
+            showNotification('Unable to send message. Please try again.', false);
+        })
+        .finally(() => {
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+        });
+    }
+
+    // --- ATTACH LISTENERS ---
+
+    // Chat open/close listeners
+    openChat.addEventListener('click', () => {
+        chatContainer.style.display = 'block';
+        openChat.style.display = 'none';
+        fetchMessages(true); // Fetch and scroll to bottom
+    });
+
+    closeChat.addEventListener('click', () => {
+        chatContainer.style.display = 'none';
+        openChat.style.display = 'block';
+    });
+    
+    // Message sending listeners
+    sendButton.addEventListener('click', postMessage);
+    
+    messageInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            postMessage();
+        }
+    });
+
+    // Polling to update messages when chat is open
+    setInterval(() => {
+        if (chatContainer.style.display === 'block') fetchMessages();
+    }, 2000);
 }

@@ -63,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
         inventory: "Inventory Management",
         orders: "Order Tracking",
         users: "User Management",
+        messages: "Customer Messages",
         alerts: "Low Stock Alerts",
       }
       pageTitle.textContent = titles[sectionId] || "Dashboard"
@@ -93,3 +94,147 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log("[v0] All setup complete")
 })
+
+// ------------------- ADMIN CHAT MODULE -------------------
+document.addEventListener("DOMContentLoaded", () => {
+    const chatContainer = document.getElementById('chat-container');
+    const chatBox = document.getElementById('chat-box');
+    const openChat = document.getElementById('openChat');
+    const closeChat = document.getElementById('closeChat');
+    const sendMessageBtn = document.getElementById('sendMessage');
+    const messageInput = document.getElementById('messageInput');
+
+    const adminId = Number(document.body.dataset.adminId);
+    let customerId = null;
+    let lastMessageId = 0;
+
+    openChat?.addEventListener('click', () => {
+        chatContainer.style.display = 'block';
+        openChat.style.display = 'none';
+        fetchCustomers();
+    });
+
+    closeChat?.addEventListener('click', () => {
+        chatContainer.style.display = 'none';
+        openChat.style.display = 'block';
+    });
+
+    function formatTimestamp(timestamp) {
+        if (!timestamp) return '';
+        const date = new Date(timestamp);
+        return isNaN(date.getTime()) ? '' : date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderMessages(messages) {
+        chatBox.innerHTML = '';
+        if (!messages.length) {
+            chatBox.innerHTML = `<div class="text-center text-muted mt-5">Select a customer to start chatting...</div>`;
+            return;
+        }
+        messages.forEach(msg => {
+            const isMine = msg.sender_type === 'admin';
+            const wrapper = document.createElement('div');
+            wrapper.className = `d-flex flex-column mb-2 ${isMine ? 'align-items-end' : 'align-items-start'}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = `px-3 py-2 rounded-3 ${isMine ? 'bg-primary text-white' : 'bg-light text-dark'}`;
+            bubble.textContent = msg.message;
+
+            const timestamp = document.createElement('small');
+            timestamp.className = `text-muted mt-1 ${isMine ? 'text-end' : 'text-start'}`;
+            timestamp.textContent = formatTimestamp(msg.created_at);
+
+            wrapper.appendChild(bubble);
+            wrapper.appendChild(timestamp);
+            chatBox.appendChild(wrapper);
+        });
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function fetchMessages() {
+        if (!customerId) return;
+
+        fetch(`../PHP/fetchMessages.php?chat_with=${customerId}`)
+            .then(res => res.text())
+            .then(txt => {
+                let payload;
+                try { payload = JSON.parse(txt); }
+                catch { 
+                    console.error("Invalid JSON from server:", txt); 
+                    return;
+                }
+                if (!payload.success) {
+                    console.error('Failed to load messages:', payload.message);
+                    return;
+                }
+                renderMessages(payload.messages);
+            })
+            .catch(err => console.error('Chat fetch error:', err));
+    }
+
+    function postMessage() {
+        if (!customerId) return;
+        const msg = messageInput.value.trim();
+        if (!msg) return;
+
+        fetch('../PHP/sendMessage.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `chat_with=${encodeURIComponent(customerId)}&message=${encodeURIComponent(msg)}`
+        })
+        .then(res => res.text())
+        .then(txt => {
+            let payload;
+            try { payload = JSON.parse(txt); }
+            catch { 
+                console.error("Invalid JSON from server:", txt); 
+                return;
+            }
+            if (!payload.success) {
+                console.error('Failed to send message:', payload.message);
+                return;
+            }
+            messageInput.value = '';
+            fetchMessages();
+        })
+        .catch(err => console.error('Chat send error:', err));
+    }
+
+    sendMessageBtn?.addEventListener('click', postMessage);
+    messageInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            postMessage();
+        }
+    });
+
+    setInterval(fetchMessages, 2000);
+
+    function fetchCustomers() {
+        fetch('../PHP/getCustomers.php')
+            .then(res => res.text())
+            .then(txt => {
+                let payload;
+                try { payload = JSON.parse(txt); }
+                catch { 
+                    console.error("Invalid JSON from server:", txt); 
+                    return;
+                }
+                if (!payload.success) return;
+
+                const list = document.getElementById('customer-list');
+                list.innerHTML = '';
+                payload.customers.forEach(c => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-outline-primary w-100 mb-1';
+                    btn.textContent = c.name;
+                    btn.addEventListener('click', () => {
+                        customerId = c.customer_id;
+                        fetchMessages();
+                    });
+                    list.appendChild(btn);
+                });
+            })
+            .catch(err => console.error('Error fetching customers:', err));
+    }
+});

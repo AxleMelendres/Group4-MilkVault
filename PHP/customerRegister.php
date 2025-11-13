@@ -1,6 +1,6 @@
 <?php
 require_once '../PHP/dbConnection.php';
-require_once '../PHP/sendSms.php';
+require_once '../OTP/sendSms.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $firstName = $_POST['firstName'];
@@ -57,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         sendSMS($contactNumber, "Your MilkVault verification code is: $otp");
 
         // Redirect to verification page
-        header("Location: ../PHP/verifyOTP.php?phone=" . urlencode($contactNumber));
+        header("Location: ../OTP/verifyOTP.php?phone=" . urlencode($contactNumber));
         exit();
     } else {
         echo "<script>alert('Registration failed. Please try again.'); window.history.back();</script>";

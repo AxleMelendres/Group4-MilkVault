@@ -1,6 +1,6 @@
 <?php
 class Database {
-    private $host = "192.168.1.4";    
+    private $host = "localhost";    
     private $user = "root";          
     private $pass = "";             
     private $dbname = "milkvaultdb";

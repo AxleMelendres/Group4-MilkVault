@@ -9,6 +9,22 @@ if (!isset($_SESSION['customer_id'])) {
 require_once '../PHP/customerQuery.php';
 
 $products = getAvailableProducts($conn);
+
+// Determine default admin to receive chat messages
+$defaultAdminId = null;
+try {
+    $adminResult = $conn->query("SELECT admin_id FROM admin ORDER BY admin_id ASC LIMIT 1");
+    if ($adminResult && $adminResult->num_rows > 0) {
+        $defaultAdminId = (int)$adminResult->fetch_assoc()['admin_id'];
+    }
+} catch (Exception $e) {
+    error_log("Unable to determine default admin: " . $e->getMessage());
+}
+
+if ($defaultAdminId === null) {
+    // Fallback to admin ID 1 so chat can still work even if query fails
+    $defaultAdminId = 1;
+}
 ?>
 
 
@@ -23,7 +39,8 @@ $products = getAvailableProducts($conn);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/customerDashboarddd.css">
 </head>
-<body>
+<body data-customer-id="<?php echo htmlspecialchars($_SESSION['customer_id']); ?>"
+      data-default-admin-id="<?php echo htmlspecialchars($defaultAdminId); ?>">
     <div id="cart-notification-message" style="
         display: none; 
         position: fixed; 
@@ -135,5 +152,34 @@ $products = getAvailableProducts($conn);
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../JS/customerDashboard.js"></script>
+
+    <!-- Chat Box (Floating) -->
+<div id="chat-container" 
+     style="position: fixed; bottom: 20px; right: 20px; width: 320px; z-index: 9999; display: none;">
+  <div class="card shadow-lg">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <span><i class="fas fa-comments"></i> Chat with Admin</span>
+      <button class="btn btn-sm btn-light" id="closeChat"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="card-body" id="chat-box" style="height: 300px; overflow-y: auto; font-size: 14px;">
+      <div class="text-center text-muted mt-5">Start chatting with admin...</div>
+    </div>
+    <div class="card-footer p-2">
+      <div class="input-group">
+        <input type="text" id="messageInput" class="form-control" placeholder="Type a message...">
+        <button class="btn btn-primary" id="sendMessage"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chat Button -->
+<button id="openChat" 
+        class="btn btn-primary rounded-circle shadow-lg" 
+        style="position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; z-index: 9998;">
+  <i class="fas fa-comment"></i>
+</button>
+
+<script src="../JS/customerChat.js"></script>
 </body>
 </html>
