@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Set Blue bubble (bg-primary) if it is the Admin's own message
   bubble.className = `px-3 py-2 rounded-3 ${isAdmin ? 'bg-primary text-white' : 'bg-light text-dark'}`;
   // Use the correct message key from PHP response
-  bubble.textContent = msg.message_text || msg.message; 
+  bubble.textContent = msg.message;
 
   const timestamp = document.createElement('small');
   timestamp.className = `text-muted mt-1 ${isAdmin ? 'text-end' : 'text-start'}`;
@@ -195,7 +195,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log(`Attempting to fetch messages for customer ID: ${activeCustomerId}`); // <-- Added Debug
     
-    fetch(`../PHP/fetchMessages.php?chat_with=${encodeURIComponent(activeCustomerId)}`)
+fetch(`../PHP/fetchMessages.php?chat_with=${encodeURIComponent(activeCustomerId)}`, {
+    method: 'GET',
+    credentials: 'include' // <-- add this line
+})
       .then((res) => {
         // Check for HTTP errors (e.g., 404, 500)
         if (!res.ok) {
@@ -245,12 +248,13 @@ document.addEventListener('DOMContentLoaded', () => {
     messageInput.disabled = true;
     sendButton.disabled = true;
 
-    fetch('../PHP/sendMessage.php', {
+    fetch('../PHP/adminSendMessage.php', {
         method: 'POST',
         // 1. CHANGE: Use application/json header
         headers: { 
             'Content-Type': 'application/json' 
         }, 
+        credentials: 'include',
         // 2. CHANGE: Send JSON body, using 'customer_id' as the recipient key
         body: JSON.stringify({ 
             customer_id: activeCustomerId, 

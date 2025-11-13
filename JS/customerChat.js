@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Helper to check if the widget is visible (for polling efficiency)
-    const isChatVisible = () => chatWidget && chatWidget.style.display !== 'none';
+    const isChatVisible = () => chatContainer && chatContainer.style.display !== 'none';
 
     // --- 2. Utility Functions ---
 
@@ -119,7 +119,7 @@ function loadConversation(forceScroll = false) {
         messageInput.disabled = true;
         sendButton.disabled = true;
 
-        fetch('../PHP/sendMessage.php', {
+        fetch('../PHP/customerSendMessage.php', {
             method: 'POST',
             credentials: 'include',
             headers: { 
