@@ -27,7 +27,7 @@ if ($realOtp && $otp === $realOtp && strtotime($expiry) > time()) {
     $update->close();
 
     $_SESSION['verified_reset_phone'] = $phone;
-    header("Location: ../PHP/resetPassword.php");
+    header("Location: ../OTP/resetPassword.php");
     exit();
 } else {
     echo "<script>alert('Invalid or expired OTP.'); window.history.back();</script>";

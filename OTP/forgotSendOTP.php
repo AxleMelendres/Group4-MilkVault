@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once '../PHP/dbConnection.php';
-require_once '../PHP/sendSms.php';
+require_once '../OTP/sendSms.php';
 
 if (!isset($_POST['contactNumber'])) {
     die("Phone number required.");
@@ -41,6 +41,6 @@ sendSMS($phone, "Your MilkVault password reset code is: $otp");
 $_SESSION['reset_phone'] = $phone;
 
 // Redirect to verification page
-header("Location: ../PHP/forgotVerify.php");
+header("Location: ../OTP/forgotVerify.php");
 exit();
 ?>

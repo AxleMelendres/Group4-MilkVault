@@ -31,7 +31,7 @@ $alertsStmt = getAlerts($conn);
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/adminDashboard.css">
 </head>
-<body>
+<body data-admin-id="<?= htmlspecialchars($_SESSION['admin_id']) ?>">
 <div class="d-flex">
     <nav class="sidebar">
         <div class="sidebar-header">
@@ -42,6 +42,7 @@ $alertsStmt = getAlerts($conn);
             <li class="nav-item"><a class="nav-link" href="#" data-section="inventory"><i class="fas fa-boxes"></i> Inventory</a></li>
             <li class="nav-item"><a class="nav-link" href="#" data-section="orders"><i class="fas fa-shopping-cart"></i> Orders</a></li>
             <li class="nav-item"><a class="nav-link" href="#" data-section="users"><i class="fas fa-users"></i> Users</a></li>
+            <li class="nav-item"><a class="nav-link" href="#" data-section="messages"><i class="fas fa-comments"></i> Messages</a></li>
             <li class="nav-item"><a class="nav-link" href="#" data-section="alerts"><i class="fas fa-exclamation-triangle"></i> Low Stock</a></li>
         </ul>
     </nav>
@@ -513,6 +514,49 @@ $alertsStmt = getAlerts($conn);
                     </div>
                 </div>
             </section>
+
+            <!-- Messages Section -->
+            <section id="messages" class="section" style="display:none;">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>Customer Conversations</h5>
+                        <button class="btn btn-sm btn-outline-secondary" id="refreshThreads">
+                            <i class="fas fa-rotate"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="row g-0" style="min-height: 460px;">
+                            <div class="col-md-4 border-end">
+                                <div class="list-group list-group-flush" id="chatThreadList" style="max-height:460px;overflow-y:auto;">
+                                    <div class="list-group-item text-center text-muted py-4">
+                                        No conversations yet.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8 d-flex flex-column">
+                                <div class="border-bottom px-4 py-3">
+                                    <h6 class="mb-0" id="activeChatTitle">Select a customer</h6>
+                                    <small class="text-muted" id="activeChatSubtitle"></small>
+                                </div>
+                                <div class="flex-grow-1 overflow-auto p-3" id="adminChatBox">
+                                    <div class="text-center text-muted mt-5">
+                                        Choose a conversation to start chatting.
+                                    </div>
+                                </div>
+                                <div class="border-top p-3">
+                                    <div class="input-group">
+                                        <input type="hidden" id="activeCustomerIdTracker" value="0">
+                                        <textarea class="form-control" id="adminMessageInput" placeholder="Type a message..." rows="1" style="resize:none;"></textarea>
+                                        <button type="button" class="btn btn-primary" id="adminSendMessage">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 </div>
@@ -521,5 +565,6 @@ $alertsStmt = getAlerts($conn);
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../JS/adminDashboard.js"></script>
+<script src="../JS/adminChat.js"></script>
 </body>
 </html>
