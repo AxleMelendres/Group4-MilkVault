@@ -1,0 +1,160 @@
+/* Modern Reset and Typography */
+body { 
+    font-family: 'Poppins', sans-serif; 
+    background-color: #eef2f5; 
+    margin: 0; 
+    padding: 0; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    min-height: 100vh;
+}
+.container { 
+    background: #ffffff; 
+    border-radius: 16px; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+    max-width: 90%; /* Mobile friendly width */
+    width: 500px;
+    padding: 30px 20px; 
+    margin: 20px;
+    text-align: center;
+}
+h1 { 
+    color: #1a73e8; /* Google Blue */
+    margin-bottom: 10px; 
+    font-weight: 700;
+}
+h3 {
+    color: #333;
+    border-bottom: 2px solid #eef2f5;
+    padding-bottom: 8px;
+    margin-top: 25px;
+    font-weight: 600;
+}
+
+/* Status Messages */
+.message { 
+    padding: 15px; 
+    border-radius: 8px; 
+    margin-bottom: 20px; 
+    font-weight: 600;
+    text-align: left;
+    display: flex;
+    align-items: center;
+}
+.message strong { margin-left: 5px; }
+.success { 
+    background-color: #e6f5e6; /* Light Green */
+    color: #388e3c; /* Dark Green */
+    border: 1px solid #c8e6c9;
+}
+.error { 
+    background-color: #fceae9; /* Light Red */
+    color: #d32f2f; /* Dark Red */
+    border: 1px solid #f9caca;
+}
+.info { 
+    background-color: #fff8e1; /* Light Yellow */
+    color: #fbc02d; /* Dark Yellow */
+    border: 1px solid #ffee58;
+}
+
+/* Order Details */
+.order-details { 
+    text-align: left; 
+    margin-top: 20px; 
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+.detail-item:last-child {
+    border-bottom: none;
+}
+.detail-item strong {
+    color: #555;
+}
+.detail-value {
+    font-weight: 600;
+    color: #333;
+}
+.detail-value.status-delivered {
+    color: #388e3c; /* Highlight delivered status */
+    font-weight: 700;
+}
+
+/* Items Table - Responsive */
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 15px;
+    font-size: 0.9em;
+}
+thead th {
+    background-color: #1a73e8;
+    color: white;
+    padding: 12px 10px;
+    font-weight: 600;
+    text-align: left;
+}
+tbody td { 
+    padding: 10px; 
+    border-bottom: 1px solid #eee; 
+    text-align: left; 
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:nth-child(even) { background-color: #fbfbfb; }
+
+/* Mobile Table View (Hiding headers and making it card-like) */
+@media screen and (max-width: 600px) {
+    table { border: 1px solid #ccc; }
+    thead { display: none; }
+    tbody td { 
+        display: block; 
+        text-align: right; 
+        padding-left: 50%;
+        position: relative;
+    }
+    tbody td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: 600;
+        text-align: left;
+        color: #555;
+    }
+}
+
+/* Totals */
+.total-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding: 15px 0;
+    border-top: 2px solid #eef2f5;
+}
+.total { 
+    font-weight: 700; 
+    font-size: 1.2em; 
+    color: #333;
+}
+.total-label {
+    margin-right: 15px;
+    color: #555;
+}
+
+.footer-text {
+    margin-top: 30px;
+    color: #777;
+    font-size: 0.9em;
+    padding-top: 15px;
+    border-top: 1px dashed #ddd;
+}

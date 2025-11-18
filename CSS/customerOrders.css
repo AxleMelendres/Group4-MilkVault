@@ -1,0 +1,326 @@
+/* Complete redesign with dairy theme styling */
+
+:root {
+    --color-primary: #6B4A88;
+    --color-secondary: #F5E6D3;
+    --color-accent: #A8D5BA;
+    --color-text-dark: #2C3E50;
+    --color-text-light: #7F8C8D;
+    --color-border: #E8DCC8;
+    --color-success: #27AE60;
+    --color-warning: #E67E22;
+    --color-danger: #C0392B;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+* {
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #FFF9F5 0%, #F5F2E8 100%);
+    color: var(--color-text-dark);
+    min-height: 100vh;
+}
+
+/* Navigation Styling */
+.navbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-sm);
+}
+
+.navbar .btn-outline-primary {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+.navbar .btn-outline-primary:hover {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    transform: translateX(-2px);
+}
+
+/* Main Content */
+main {
+    background: transparent;
+}
+
+h1 {
+    color: var(--color-primary) !important;
+    letter-spacing: -0.5px;
+}
+
+.lead {
+    font-size: 1.125rem;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+}
+
+/* Order Cards */
+.order-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
+}
+
+.order-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+}
+
+.order-image-wrapper {
+    width: 100%;
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, var(--color-secondary) 0%, rgba(168, 213, 186, 0.1) 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.order-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.order-card:hover .order-image-wrapper img {
+    transform: scale(1.05);
+}
+
+/* Product Details */
+.badge-quantity {
+    background-color: var(--color-secondary) !important;
+    color: var(--color-primary) !important;
+    font-weight: 600;
+    padding: 0.35rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+}
+
+h5.fw-600 {
+    font-weight: 600;
+    color: var(--color-text-dark);
+}
+
+.text-muted {
+    color: var(--color-text-light) !important;
+}
+
+.text-muted small {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bi {
+    vertical-align: -0.125em;
+}
+
+/* Status Badges */
+.badge {
+    padding: 0.5rem 0.875rem !important;
+    font-weight: 500;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-transform: capitalize;
+}
+
+.status-delivered {
+    background-color: #D4EDDA !important;
+    color: var(--color-success) !important;
+    border: 1px solid #C3E6CB;
+}
+
+.status-pending {
+    background-color: #FFF3CD !important;
+    color: var(--color-warning) !important;
+    border: 1px solid #FFEAA7;
+}
+
+.status-processing {
+    background-color: #D1ECF1 !important;
+    color: #0C5460 !important;
+    border: 1px solid #BEE5EB;
+}
+
+.status-cancelled {
+    background-color: #F8D7DA !important;
+    color: var(--color-danger) !important;
+    border: 1px solid #F5C6CB;
+}
+
+/* Price Styling */
+.text-success {
+    color: var(--color-success) !important;
+    font-size: 1.5rem;
+}
+
+h5.fw-700 {
+    font-weight: 700;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #5a3f75 !important;
+    border-color: #5a3f75 !important;
+    box-shadow: 0 4px 12px rgba(107, 74, 136, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+    color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    font-weight: 600;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.875rem;
+}
+
+.rounded-pill {
+    border-radius: 20px !important;
+}
+
+/* Empty State */
+.empty-state {
+    background: white;
+    border: 2px dashed var(--color-border);
+    border-radius: 12px;
+    padding: 3rem 1.5rem;
+    margin: 2rem 0;
+}
+
+.empty-state h4 {
+    color: var(--color-primary);
+}
+
+/* Footer */
+footer {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-top: 1px solid var(--color-border) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    main {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    .order-card {
+        padding: 1rem;
+    }
+
+    .order-card .row {
+        row-gap: 1rem;
+    }
+
+    .order-image-wrapper {
+        max-width: 120px;
+        margin: 0 auto 1rem;
+    }
+
+    .ps-md-4 {
+        padding-left: 0 !important;
+    }
+
+    .text-end {
+        text-align: left !important;
+    }
+
+    h5.fw-700 {
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .btn-sm {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+
+    .display-5 {
+        font-size: 2rem;
+    }
+}
+
+/* Ultra-small screens */
+@media (max-width: 480px) {
+    .container-lg {
+        padding: 0 0.75rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .order-card {
+        padding: 0.75rem;
+    }
+
+    .badge-quantity {
+        margin-top: 0.25rem;
+    }
+
+    main {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+}
+
+/* Animation */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.order-card {
+    animation: slideIn 0.6s ease;
+}
+
+.order-card:nth-child(1) { animation-delay: 0.1s; }
+.order-card:nth-child(2) { animation-delay: 0.2s; }
+.order-card:nth-child(3) { animation-delay: 0.3s; }
